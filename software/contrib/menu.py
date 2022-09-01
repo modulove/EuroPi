@@ -14,7 +14,9 @@ from contrib.polyrhythmic_sequencer import PolyrhythmSeq
 from contrib.poly_square import PolySquare
 from contrib.radio_scanner import RadioScanner
 from contrib.scope import Scope
+from contrib.smooth_random_voltages import SmoothRandomVoltages
 from contrib.strange_attractor import StrangeAttractor
+from contrib.turing_machine import EuroPiTuringMachine
 from calibrate import Calibrate
 
 # Scripts that are included in the menu
@@ -32,7 +34,9 @@ EUROPI_SCRIPT_CLASSES = [
     PolySquare,
     RadioScanner,
     Scope,
+    SmoothRandomVoltages,
     StrangeAttractor,
+    EuroPiTuringMachine,
     Calibrate,
 ]
 
