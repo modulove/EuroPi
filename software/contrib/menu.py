@@ -26,8 +26,10 @@ from contrib.piconacci import Piconacci
 from contrib.polyrhythmic_sequencer import PolyrhythmSeq
 from contrib.poly_square import PolySquare
 from contrib.probapoly import Probapoly
+from contrib.quantizer import QuantizerScript
 from contrib.radio_scanner import RadioScanner
 from contrib.scope import Scope
+from contrib.sequential_switch import SequentialSwitch
 from contrib.smooth_random_voltages import SmoothRandomVoltages
 from contrib.strange_attractor import StrangeAttractor
 from contrib.turing_machine import EuroPiTuringMachine
@@ -50,8 +52,10 @@ EUROPI_SCRIPT_CLASSES = [
     PolyrhythmSeq,
     PolySquare,
     Probapoly,
+    QuantizerScript,
     RadioScanner,
     Scope,
+    SequentialSwitch,
     SmoothRandomVoltages,
     StrangeAttractor,
     EuroPiTuringMachine,
