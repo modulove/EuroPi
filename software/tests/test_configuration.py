@@ -1,4 +1,19 @@
+# Copyright 2024 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import pytest
+
+import re
 
 from firmware import configuration as config
 from firmware.configuration import ConfigSpec, ConfigFile, Validation
@@ -19,7 +34,7 @@ def simple_config_spec():
     return ConfigSpec(
         [
             config.choice(name="a", choices=[1, 2, 3], default=2),
-            config.integer(name="b", range=range(5), default=3),
+            config.integer(name="b", minimum=0, maximum=4, default=3),
         ]
     )
 
@@ -84,27 +99,26 @@ def test_helper_choice():
 def test_helper_int():
     config_points = ConfigSpec(
         [
-            config.integer(name="a", range=range(5), default=2),
-            config.integer(name="b", range=range(-5, 6), default=0),
-            config.integer(name="c", range=range(-5, 6, 2), default=1),
+            config.integer(name="a", minimum=0, maximum=4, default=2),
+            config.integer(name="b", minimum=-5, maximum=5, default=0),
         ]
     )
 
-    assert len(config_points) == 3
-    assert config_points.default_config() == {"a": 2, "b": 0, "c": 1}
-    assert config_points.points["a"].type == "choice"
-    assert config_points.points["b"].type == "choice"
-    assert config_points.points["c"].type == "choice"
-    assert config_points.points["a"].choices == [0, 1, 2, 3, 4]
-    assert config_points.points["b"].choices == [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-    assert config_points.points["c"].choices == [-5, -3, -1, 1, 3, 5]
+    assert len(config_points) == 2
+    assert config_points.default_config() == {"a": 2, "b": 0}
+    assert config_points.points["a"].type == int
+    assert config_points.points["b"].type == int
+    assert config_points.points["a"].minimum == 0
+    assert config_points.points["a"].maximum == 4
+    assert config_points.points["b"].minimum == -5
+    assert config_points.points["b"].maximum == 5
 
 
 # ConfigFile
 
 
 def test_config_file_name(class_with_config):
-    assert ConfigFile.config_filename(class_with_config) == "config/config_AClassWithConfig.json"
+    assert ConfigFile.config_filename(class_with_config) == "config/AClassWithConfig.json"
 
 
 def test_load_config_no_config(class_with_config):
@@ -122,7 +136,8 @@ def test_save_and_load_saved_config(class_with_config, simple_config_spec):
     ConfigFile.save_config(class_with_config, {"a": 1, "b": 2})
 
     with open(ConfigFile.config_filename(class_with_config), "r") as f:
-        assert f.read() == '{"a": 1, "b": 2}'
+        # allow arbitrary whitespace in the JSON formatting
+        assert re.match(r'\{\s*"a"\s*:\s*1\s*,\s*"b"\s*:\s*2\s*\}', f.read())
 
     assert ConfigFile.load_config(class_with_config, simple_config_spec) == {
         "a": 1,
@@ -134,7 +149,8 @@ def test_load_config_with_fallback_to_defaults(class_with_config, simple_config_
     ConfigFile.save_config(class_with_config, {"a": 1})
 
     with open(ConfigFile.config_filename(class_with_config), "r") as f:
-        assert f.read() == '{"a": 1}'
+        # allow arbitrary whitespace in the JSON formatting
+        assert re.match(r'\{\s*"a"\s*:\s*1\s*\}', f.read())
 
     assert ConfigFile.load_config(class_with_config, simple_config_spec) == {
         "a": 1,

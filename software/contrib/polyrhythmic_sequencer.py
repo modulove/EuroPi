@@ -1,3 +1,16 @@
+# Copyright 2022 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 Polyrhythmic Sequencer
 author: Adam Wonak (github.com/awonak)
@@ -212,7 +225,8 @@ class PolyrhythmSeq(EuroPiScript):
         @din.handler_falling
         def triggers_off():
             # Turn off all of the trigger CV outputs.
-            [seq.trigger_cv.off() for seq in self.seqs]
+            for seq in self.seqs:
+                seq.trigger_cv.off()
             self.trigger_and.off()
             self.trigger_xor.off()
 
@@ -258,13 +272,14 @@ class PolyrhythmSeq(EuroPiScript):
         self.seqs[1].set_state(_state.seq2)
         self.polys = list(_state.polys)
         self.seq_poly = list(_state.seq_poly)
-    
+
     def reset_check(self):
         """Reset the sequences and triggers when no clock pulse detected for specified time."""
         if self.counter != 0 and ticks_diff(ticks_ms(), din.last_triggered()) > self.reset_timeout:
             self.step = 0
             self.counter = 0
-            [s.reset() for s in self.seqs]
+            for s in self.seqs:
+                s.reset()
             self.trigger_and.off()
             self.trigger_xor.off()
 
@@ -336,7 +351,7 @@ class PolyrhythmSeq(EuroPiScript):
 
             if self.page == 2:
                 self.edit_poly()
-            
+
             self.reset_check()
 
             self.show_menu_header()

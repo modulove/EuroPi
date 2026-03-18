@@ -1,9 +1,9 @@
 # FAQ
 
 ### Frequently asked questions about the EuroPi project. If you can't find the answer to your question here, head over to [The Discord](https://discord.gg/JaQwtCnBV5) and ask it in the support channel!
-  
+
 #
-  
+
 ### Topics:
 
 ### [General Questions](#general-questions)
@@ -42,6 +42,5 @@
 
 ## Calibration
 
-NOTE: ADD THIS TO THE TROUBLESHOOTING GUIDE
 | When in the second stage of calibration, my module never reaches 10V, what do I do? | Refer to the [troubleshooting guide](troubleshooting.md) |
 |--|--|

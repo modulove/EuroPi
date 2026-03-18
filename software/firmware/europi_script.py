@@ -1,10 +1,24 @@
+# Copyright 2024 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """Provides a base class for scripts which wish to participate in the bootloader menu."""
+
 import os
 import json
 from utime import ticks_diff, ticks_ms
 from configuration import ConfigSpec, ConfigFile
 from europi_config import EuroPiConfig
-from file_utils import load_file, delete_file, load_json_data
+from file_utils import load_file, delete_file, load_json_file
 
 
 class EuroPiScript:
@@ -14,10 +28,10 @@ class EuroPiScript:
 
     To make your script compatible with the menu, you must:
 
-      1. import ``EuroPiScript``
-      2. define your script as a class that inherits from this base class.
-      3. override ``main()`` to define your script's main loop
-      4. Surround the call to ``main()`` with a guard to prevent execution upon import
+    #. import ``EuroPiScript``
+    #. define your script as a class that inherits from this base class.
+    #. override ``main()`` to define your script's main loop
+    #. Surround the call to ``main()`` with a guard to prevent execution upon import
 
     An minimal example::
 
@@ -32,31 +46,43 @@ class EuroPiScript:
        if __name__ == "__main__":  # 4
            HelloWorld().main()
 
-    To include your script in the menu it must be added to the ``EUROPI_SCRIPT_CLASSES`` list in ``contrib/menu.py``.
+    To include your script in the menu it must be added to the ``EUROPI_SCRIPTS`` list in ``contrib/menu.py``.
 
     **Save/Load Script State**
 
-    Optionally, you can add a bit of code to enable your script to save state, and load previous state at startup. By default, when exiting the script to menu selection, ``save_state()`` will be called. Additionally, you can add calls to ``save_state()`` whenever state changes.
+    Optionally, you can add a bit of code to enable your script to save state, and load previous state at startup. By
+    default, when exiting the script to menu selection, ``save_state()`` will be called. Additionally, you can add calls
+    to ``save_state()`` whenever state changes.
 
     When adding ``save_state()`` calls to your script, there are a few important considerations to keep in mind:
 
-        * Frequency of saves - scripts should only save state to disk when state changes, and should not save too frequently because os write operations are expensive in terms of time. Saving too frequently will affect the performance of a script.
-        * Save state file size - The pico only has about 1MB of free space available so save state storage format is important to keep as minimal as possible.
-        * No externally influenced input - The instance variables your script saves should not be externally influenced, meaning you should not save the current knob position, current analog input value or current digital input value.
+        * Frequency of saves - scripts should only save state to disk when state changes, and should not save too frequently
+          because os write operations are expensive in terms of time. Saving too frequently will affect the performance of a script.
+
+        * Save state file size - The pico only has about 1MB of free space available so save state storage format is important to
+          keep as minimal as possible.
+
+        * No externally influenced input - The instance variables your script saves should not be externally influenced,
+          meaning you should not save the current knob position, current analog input value or current digital input value.
 
     To add the ability to save and load state, you must:
 
-        1. **Initialize base classes** When implementing the ``EuroPiScript`` base class, its initialization method must be called to initialize its intance variables.
+        #. **Initialize base classes** When implementing the ``EuroPiScript`` base class, its initialization method must be
+           called to initialize its intance variables.
 
-        2. **Call the inherited EuroPiScript method load_state_X().** The ``EuroPiScript`` base class has ``load_state_X()`` methods to check for a previously saved state of a specific format. When initializing your script, call ``load_state_X()`` where ``X`` is the persistance format of choice. If no state is found, an empty value will be returned.
+        #. **Call the inherited EuroPiScript method load_state_X().** The ``EuroPiScript`` base class has ``load_state_X()``
+           methods to check for a previously saved state of a specific format. When initializing your script, call ``load_state_X()``
+           where ``X`` is the persistance format of choice. If no state is found, an empty value will be returned.
 
-        3. **Apply saved state variables to this instance.** Set state variables with default fallback values if not found in the json save state.
+        #. **Apply saved state variables to this instance.** Set state variables with default fallback values if not found in the json save state.
 
-        4. **Save state upon state change.** When a state variable changes, call the save state function.
+        #. **Save state upon state change.** When a state variable changes, call the save state function.
 
-        5. **Implement save_state() method.** Provide an implementation to serialize the state variables into a string, JSON, or bytes an call the appropriate save state method.
+        #. **Implement save_state() method.** Provide an implementation to serialize the state variables into a string, JSON, or
+           bytes an call the appropriate save state method.
 
-        6. **Throttle the frequency of saves.** Saving state too often could negatively impact the performance of your script, so it is advised to add some checks in your code to ensure it doesn't save too frequently.
+        #. **Throttle the frequency of saves.** Saving state too often could negatively impact the performance of your script, so it is
+           advised to add some checks in your code to ensure it doesn't save too frequently.
 
 
     Here is an extension of the script above with some added trivial features that incorporate saving and loading script state::
@@ -117,10 +143,10 @@ class EuroPiScript:
             return [configuration.choice(name="language", choices=["english", "french"], default="english")]
 
     Our main method could then use the value of this configuration to display its greeting in the
-    configured language::
+    configured language:
 
         def main(self):
-            if self.config["language"] == "french":
+            if self.config.LANGUAGE == "french":
                 oled.centre_text("Bonjour le monde")
             else:
                 oled.centre_text("Hello world")
@@ -169,18 +195,7 @@ class EuroPiScript:
         appropriate save method, such as `save_state_json(state)`. See the
         class documentation for a full example.
         """
-        pass
-
-    def save_state_str(self, state: str):
-        """Take state in persistence format as a string and write to disk.
-
-        .. note::
-            Be mindful of how often `save_state_str()` is called because
-            writing to disk too often can slow down the performance of your
-            script. Only call save state when state has changed and consider
-            adding a time since last save check to reduce save frequency.
-        """
-        return self._save_state(state)
+        self.save_state_json({})
 
     def save_state_bytes(self, state: bytes):
         """Take state in persistence format as bytes and write to disk.
@@ -191,7 +206,9 @@ class EuroPiScript:
             script. Only call save state when state has changed and consider
             adding a time since last save check to reduce save frequency.
         """
-        return self._save_state(state, mode="wb")
+        with open(self._state_filename, "wb") as file:
+            file.write(state)
+            self._last_saved = ticks_ms()
 
     def save_state_json(self, state: dict):
         """Take state as a dict and save as a json string.
@@ -202,21 +219,9 @@ class EuroPiScript:
             script. Only call save state when state has changed and consider
             adding a time since last save check to reduce save frequency.
         """
-        json_str = json.dumps(state)
-        return self._save_state(json_str)
-
-    def _save_state(self, state: str, mode: str = "w"):
-        with open(self._state_filename, mode) as file:
-            file.write(state)
-        self._last_saved = ticks_ms()
-
-    def load_state_str(self) -> str:
-        """Check disk for saved state, if it exists, return the raw state value as a string.
-
-        Check for a previously saved state. If it exists, return state as a
-        string. If no state is found, an empty string will be returned.
-        """
-        return self._load_state()
+        with open(self._state_filename, "w") as file:
+            json.dump(state, file, separators=(",\n", ":"))
+            self._last_saved = ticks_ms()
 
     def load_state_bytes(self) -> bytes:
         """Check disk for saved state, if it exists, return the raw state value as bytes.
@@ -224,7 +229,7 @@ class EuroPiScript:
         Check for a previously saved state. If it exists, return state as a
         byte string. If no state is found, an empty string will be returned.
         """
-        return self._load_state(mode="rb")
+        return load_file(self._state_filename, "rb")
 
     def load_state_json(self) -> dict:
         """Load previously saved state as a dict.
@@ -232,10 +237,7 @@ class EuroPiScript:
         Check for a previously saved state. If it exists, return state as a
         dict. If no state is found, an empty dictionary will be returned.
         """
-        return load_json_data(self._load_state())
-
-    def _load_state(self, mode: str = "r") -> any:
-        return load_file(self._state_filename, mode)
+        return load_json_file(self._state_filename)
 
     def remove_state(self):
         """Remove the state file for this script."""

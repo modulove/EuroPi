@@ -1,6 +1,25 @@
+# Copyright 2024 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from machine import ADC, Pin
 
-from europi import AnalogueReader, DigitalReader, Knob, MAX_UINT16, INPUT_CALIBRATION_VALUES
+from europi_hardware import (
+    AnalogueReader,
+    DigitalReader,
+    Knob,
+    MAX_UINT16,
+    INPUT_CALIBRATION_VALUES,
+)
 
 
 class MockHardware:
@@ -31,7 +50,11 @@ class MockHardware:
         self.set_ADC_u16_value(reader, value * MAX_UINT16)
 
     def set_analogue_input_percent(self, reader: AnalogueReader, value: float):
-        self.set_ADC_u16_value(reader, value * INPUT_CALIBRATION_VALUES[-1])
+        self.set_ADC_u16_value(
+            reader,
+            value * (INPUT_CALIBRATION_VALUES[-1] - INPUT_CALIBRATION_VALUES[0])
+            + INPUT_CALIBRATION_VALUES[0],
+        )
 
     def set_knob_percent(self, knob: Knob, value: float):
         self.set_ADC_u16_value(knob, (1 - value) * MAX_UINT16)

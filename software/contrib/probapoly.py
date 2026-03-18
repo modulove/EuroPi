@@ -1,3 +1,16 @@
+# Copyright 2024 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from europi import *
 from time import ticks_diff, ticks_ms, sleep
 from random import randint, uniform
@@ -33,7 +46,7 @@ output_6: Gate lower polyrhythm (50% probability)
 
 class Probapoly(EuroPiScript):
     def __init__(self):
-        
+
         # Needed if using europi_script
         super().__init__()
 
@@ -58,7 +71,7 @@ class Probapoly(EuroPiScript):
         self.manualPatternLength = 32  # Default manual pattern length when self.manualPatternLengthFeature is first True
         self.UPPER_BUTTON_PRESS_TIME_LIMIT = 3000 # Used as a workaround to stop phantom button presses (Issue 132)
         self.SHORT_BUTTON_PRESS_TIME_THRESHOLD = 500
-        
+
         # Todo: Make this mode accessible from the UI
         # Mode 1: Analogue input toggles double time feature
         # Mode 2: Analogue input voltage adjusts the upper poly value
@@ -115,9 +128,9 @@ class Probapoly(EuroPiScript):
                     self.patternLength = self.manualPatternLength
 
     def handleClock(self):
-        
+
         # Play upper gate
-        if self.step % self.upper == 0:    
+        if self.step % self.upper == 0:
             cv1.value(1)
 
         # Output trigger with fixed and unrelated probabilities
@@ -169,7 +182,7 @@ class Probapoly(EuroPiScript):
         rectLeftX = 20
         rectRightX = 44
         rectLength = 20
- 
+
         # Calculate where the steps should be using left justification
         if self.step <= 9:
             stepLeftX = 86
@@ -204,7 +217,7 @@ class Probapoly(EuroPiScript):
 
     def main(self):
         while True:
-            self.getLower() 
+            self.getLower()
             self.getUpper()
             self.getAinValue()
             self.updateScreen()
@@ -233,4 +246,3 @@ class Probapoly(EuroPiScript):
 if __name__ == '__main__':
     dm = Probapoly()
     dm.main()
-

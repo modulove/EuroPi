@@ -1,4 +1,18 @@
+# Copyright 2024 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import pytest
+import re
 from firmware import configuration as config
 from europi_script import EuroPiScript
 from configuration import ConfigFile
@@ -35,8 +49,8 @@ def script_for_testing_with_config():
 
 
 def test_save_state(script_for_testing):
-    script_for_testing._save_state("test state")
-    assert script_for_testing._load_state() == "test state"
+    script_for_testing.save_state_json({"spam": "eggs"})
+    assert script_for_testing.load_state_json() == {"spam": "eggs"}
 
 
 def test_state_file_name(script_for_testing):
@@ -47,7 +61,10 @@ def test_save_load_state_json(script_for_testing):
     state = {"one": 1, "two": ["a", "bb"], "three": True}
     script_for_testing.save_state_json(state)
     with open(script_for_testing._state_filename, "r") as f:
-        assert f.read() == '{"one": 1, "two": ["a", "bb"], "three": true}'
+        assert re.match(
+            r'\{\s*"one"\s*:\s*1\s*,\s*"two"\s*:\s*\[\s*"a"\s*,\s*"bb"\s*\]\s*,\s*"three"\s*:\s*true\s*\}',
+            f.read(),
+        )
     assert script_for_testing.load_state_json() == state
 
 
@@ -78,4 +95,4 @@ def test_load_config_defaults(script_for_testing_with_config):
 
 
 def test_load_europi_config(script_for_testing_with_config):
-    assert script_for_testing_with_config.europi_config["pico_model"] == "pico"
+    assert script_for_testing_with_config.europi_config.PICO_MODEL == "pico"

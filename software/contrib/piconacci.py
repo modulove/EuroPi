@@ -1,3 +1,16 @@
+# Copyright 2022 Allen Synthesis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from europi import *
 import machine
 from time import ticks_diff, ticks_ms
@@ -14,10 +27,10 @@ labels: triggers, maths
 Triggers based on the Fibonacci sequence
 
 digital_in: clock in
-analog_in: 
+analog_in:
 
-knob_1: 
-knob_2: 
+knob_1:
+knob_2:
 
 button_1: Short Press: Move window on sequence left. Long Press: Rotate values left
 button_2: Short Press: Move window on sequence to the right. Long Press: Rotate values right
@@ -109,7 +122,7 @@ class Piconacci(EuroPiScript):
 
     def main(self):
         # Reset all outputs
-        [cv.off() for cv in cvs]
+        turn_off_all_cvs()
         while True:
             # If the state has changed, update display
             if self.display_update_required:
